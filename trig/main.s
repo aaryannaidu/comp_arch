@@ -1,15 +1,60 @@
 .data
-memo: .space 4000
+memo: .zero 4000
         
 .text
 .globl main
 main:
+#    jal ra, memo_init
     
     li a0 4
+    jal ra, tri_num_mul
+    li a7, 1
+    ecall
+    li a0, 10
+    li a7, 11
+    ecall
+    
+    li a0 8
     jal ra, tri_num_loop
     li a7, 1
     ecall
-    li a7, 10
+    li a0, 10
+    li a7, 11
+    ecall
+    
+    li a0 13
+    jal ra, tri_num_rec
+    li a7, 1
+    ecall
+    li a0, 10
+    li a7, 11
+    ecall
+    
+    li a0 6
+    jal ra, tri_num_mem
+    li a7, 1
+    ecall
+    li a0 10
+    li a7, 11
+    ecall
+    
+    li a0 4
+    jal ra, tri_num_mem
+    li a7, 1
+    ecall
+    li a0 10
+    li a7, 11
+    ecall
+    
+    li a0 10
+    jal ra, tri_num_mem
+    li a7, 1
+    ecall
+    li a0 10
+    li a7, 11
+    ecall
+    
+    li a7 10
     ecall
 # direct multiplication
 tri_num_mul:
@@ -49,39 +94,35 @@ rec:
     addi sp sp 8
     add a0 t1 a0
     ret
-    
-memo_init:
-    la t1 memo
-    sw x0 0(t1)
-    li t0 -1
-    li t2 4000
-    add t2 t1 t2
-    addi t1 t1 4
-    loops:
-        beq t1 t2 stop
-        sw t0 0(t1)
-        addi t1 t1 4
-        j loops
-    stop:
-        la t1 memo
-        ret  
-
+#memoised  
 tri_num_mem:
     slli t0 a0 2
     la t1 memo
     li t2 -1
-    add t6 t0 t1
-    lw t4 0(t6)
-    beq t2 t4 lp
+    add t0 t0 t1
+    lw t4 0(t0)
+    beq zero a0 base
+    beq zero t4 lp
     mv a0 t4
     ret
 lp:
     mv t3 a0
+    addi sp sp -8
+    sw ra 4(sp)
+    sw t3 0(sp)
     addi a0 a0 -1
     jal ra tri_num_mem
+    lw t3 0(sp)
+    lw ra 4(sp)
+    addi sp sp 8
+    slli t0 t3 2
+    la t1 memo
+    add t0 t1 t0
     add t3 t3 a0
-    sw t3 0(t6)
+    sw t3 0(t0)
     mv a0 t3
     ret
-         
-        
+    
+base:
+    li a0 0
+    ret
